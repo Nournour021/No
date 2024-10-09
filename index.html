@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اشتراك في قناة YouTube</title>
+    <script src="https://apis.google.com/js/api.js"></script>
+</head>
+<body>
+    <h1>اشتراك في قناة YouTube</h1>
+    <button id="loginButton">تسجيل الدخول باستخدام Google</button>
+    <button id="subscribeButton" disabled>اشتراك في القناة</button>
+
+    <script>
+        var CLIENT_ID = 'YOUR_CLIENT_ID';
+        var API_KEY = 'YOUR_API_KEY';
+        var CHANNEL_ID = 'UC9m1E1BvZQDYSyADFkEHPgg'; // معرّف القناة
+        var SCOPES = 'https://www.googleapis.com/auth/youtube.force-ssl';
+
+        var subscribeButton = document.getElementById('subscribeButton');
+        var loginButton = document.getElementById('loginButton');
+
+        // تحميل مكتبة OAuth2
+        function handleClientLoad() {
+            gapi.load('client:auth2', initClient);
+        }
+
+        // تهيئة OAuth2
+        function initClient() {
+            gapi.client.init({
+                apiKey: API_KEY,
+                clientId: CLIENT_ID,
+                scope: SCOPES,
+                discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest"]
+            }).then(function () {
+                var authInstance = gapi.auth2.getAuthInstance();
+                loginButton.onclick = function () {
+                    authInstance.signIn().then(function () {
+                        subscribeButton.disabled = false;
+                    });
+                };
+
+                subscribeButton.onclick = function () {
+                    subscribeToChannel();
+                };
+            });
+        }
+
+        // وظيفة الاشتراك في القناة
+        function subscribeToChannel() {
+            gapi.client.youtube.subscriptions.insert({
+                part: 'snippet',
+                resource: {
+                    snippet: {
+                        resourceId: {
+                            kind: 'youtube#channel',
+                            channelId: CHANNEL_ID
+                        }
+                    }
+                }
+            }).then(function (response) {
+                console.log('تم الاشتراك بنجاح:', response);
+            }, function (error) {
+                console.error('حدث خطأ أثناء الاشتراك:', error);
+            });
+        }
+
+        // بدء تحميل مكتبة Google API
+        handleClientLoad();
+    </script>
+</body>
+</html>
